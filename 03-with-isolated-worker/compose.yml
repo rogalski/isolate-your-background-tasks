@@ -1,0 +1,29 @@
+services:
+  web:
+    build: .
+    ports: ["8080:80"]
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+  worker:
+    build: .
+    entrypoint: "python3 -m app.worker"
+    depends_on: [redis]
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+  redis:
+    image: redis:7.2
+    healthcheck:
+        test: "[ $$(redis-cli -a ping) = 'PONG' ]"
+    volumes:
+      - cache:/data
+volumes:
+  cache:
+    driver: local
